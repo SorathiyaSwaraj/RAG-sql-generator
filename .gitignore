@@ -1,0 +1,16 @@
+# Private database dumps and anything generated from them
+/db dumps/
+/data/
+*.dmp
+
+# Secrets and local configuration
+.env
+/config/databases.yaml
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
