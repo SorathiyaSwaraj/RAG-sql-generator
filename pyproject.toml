@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "schema-rag"
+version = "0.1.0"
+description = "Schema-aware RAG that generates SQL queries and stored procedures from natural language."
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic==2.14.2",
+    "PyYAML==6.0.3",
+    "sqlglot==30.27.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.2.0",
+    "ruff==0.17.3",
+]
+
+[project.scripts]
+schema-rag = "schema_rag.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
