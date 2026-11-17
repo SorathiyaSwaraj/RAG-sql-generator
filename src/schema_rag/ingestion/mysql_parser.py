@@ -13,7 +13,7 @@ import sqlglot
 from sqlglot import exp
 from sqlglot.errors import ParseError, TokenError
 
-from schema_rag.models import Column, ColumnPair, ForeignKey, Table
+from schema_rag.models import Column, ColumnPair, ForeignKey, Procedure, Table, View
 
 _VERSION_COMMENT = re.compile(r"^/\*!\d*\s*(.*?)\s*\*/$", re.DOTALL)
 _CREATE_TABLE = re.compile(r"CREATE\s+TABLE\b", re.IGNORECASE)
@@ -21,12 +21,17 @@ _IGNORED = re.compile(
     r"(DROP|SET|USE|LOCK|UNLOCK|INSERT|CREATE\s+DATABASE|ALTER\s+TABLE\s+\S+\s+(DISABLE|ENABLE)\s+KEYS)\b",
     re.IGNORECASE,
 )
+_PROCEDURE = re.compile(r"CREATE\s+(?:DEFINER\s*=\s*\S+\s+)?PROCEDURE\s+`?(\w+)`?", re.IGNORECASE)
+_VIEW = re.compile(r"CREATE\b.*?\bVIEW\s+`?(\w+)`?\s+AS\b", re.IGNORECASE | re.DOTALL)
+_INNER_VERSION_MARKER = re.compile(r"/\*!\d*\s*|\s*\*/")
 _LABEL = re.compile(r"[A-Za-z]+(?:\s+[A-Za-z]+)?")
 
 
 @dataclass
 class ParsedDump:
     tables: list[Table] = field(default_factory=list)
+    views: list[View] = field(default_factory=list)
+    procedures: list[Procedure] = field(default_factory=list)
     # Short keyword labels only, so row data can never reach the ingestion report.
     unrecognized: list[str] = field(default_factory=list)
 
@@ -40,6 +45,11 @@ def parse_mysql_statements(statements: Iterable[str]) -> ParsedDump:
                 parsed.tables.append(_parse_table(body))
             except (ParseError, TokenError):
                 parsed.unrecognized.append("CREATE TABLE (parse failed)")
+        elif match := _PROCEDURE.match(body):
+            parsed.procedures.append(Procedure(name=match.group(1), definition=body))
+        elif match := _VIEW.match(_INNER_VERSION_MARKER.sub(" ", statement).strip()):
+            definition = _INNER_VERSION_MARKER.sub(" ", statement).strip()
+            parsed.views.append(View(name=match.group(1), definition=definition))
         elif not _IGNORED.match(body):
             parsed.unrecognized.append(_label(body))
     return parsed

@@ -134,3 +134,32 @@ def test_parses_table_from_split_dump():
 
     assert [table.name for table in parsed.tables] == ["orders"]
     assert parsed.unrecognized == []
+
+
+def test_extracts_procedure_with_exact_text():
+    definition = (
+        "CREATE DEFINER=`app`@`localhost` PROCEDURE `daily_sales`(IN d date)\n"
+        "BEGIN\n  -- note\n  SELECT 1;\nEND"
+    )
+    dump = f"DELIMITER ;;\n{definition} ;;\nDELIMITER ;\n"
+
+    parsed = parse_mysql_statements(split_mysql_statements(dump))
+
+    assert parsed.procedures[0].name == "daily_sales"
+    assert parsed.procedures[0].definition == definition
+    assert parsed.unrecognized == []
+
+
+@pytest.mark.parametrize(
+    "statement",
+    [
+        "CREATE VIEW `v_sales` AS SELECT 1",
+        "/*!50001 CREATE ALGORITHM=UNDEFINED */ /*!50013 DEFINER=`a`@`b` */ "
+        "/*!50001 VIEW `v_sales` AS select 1 */",
+    ],
+)
+def test_extracts_views(statement):
+    parsed = parse_mysql_statements([statement])
+
+    assert parsed.views[0].name == "v_sales"
+    assert parsed.unrecognized == []
