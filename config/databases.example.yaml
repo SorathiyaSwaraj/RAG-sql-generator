@@ -1,0 +1,12 @@
+# Copy to config/databases.yaml, which is gitignored, and point it at your dumps.
+data_dir: data
+databases:
+  mysql:
+    dialect: mysql
+    dump_path: "db dumps/mysql/mysql.sql"
+    field_docs_dir: "db dumps/mysql"
+    exclude_tables: []
+  oracle:
+    dialect: oracle
+    dump_path: "db dumps/oracle/oracle_example_1.sql"
+    exclude_tables: []
