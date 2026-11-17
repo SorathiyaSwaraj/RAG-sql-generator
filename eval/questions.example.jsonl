@@ -1,0 +1,4 @@
+{"id": "q1", "kind": "query", "request": "Total order value per customer last month", "fields": ["customer name", "order total"], "gold_tables": ["customers", "orders", "order_items"]}
+{"id": "q2", "kind": "query", "request": "Orders that have not shipped after ten days", "fields": ["order id", "days waiting"], "gold_tables": ["orders", "shipments"]}
+{"id": "q3", "kind": "query", "request": "How many unicorns did each customer adopt?", "fields": [], "gold_tables": [], "unanswerable": true}
+{"id": "q4", "kind": "procedure", "request": "Daily sales report between two dates", "fields": ["date", "sales"], "gold_tables": ["orders", "order_items"]}

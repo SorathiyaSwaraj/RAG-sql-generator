@@ -14,3 +14,10 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 .ruff_cache/
+
+# Real evaluation questions name real tables
+/eval/questions.jsonl
+
+# Personal notes that mention the real schema
+/COMMITS.md
+/study/
