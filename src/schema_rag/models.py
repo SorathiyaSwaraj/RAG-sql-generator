@@ -22,6 +22,10 @@ class Column(SchemaModel):
     data_type: str
     nullable: bool = True
     comment: str | None = None
+    description: str | None = None
+    synonyms: tuple[str, ...] = ()
+    values_or_format: str | None = None
+    caveats: str | None = None
 
 
 class ColumnPair(SchemaModel):
@@ -45,6 +49,8 @@ class Table(SchemaModel):
     primary_key: tuple[str, ...] = ()
     foreign_keys: tuple[ForeignKey, ...] = ()
     comment: str | None = None
+    description: str | None = None
+    caveats: str | None = None
 
     @model_validator(mode="after")
     def check_key_columns_exist(self) -> Self:
@@ -70,12 +76,23 @@ class Procedure(SchemaModel):
     definition: str
 
 
+class GlossaryTerm(SchemaModel):
+    """A business term that spans several fields."""
+
+    term: str
+    synonyms: tuple[str, ...] = ()
+    definition: str = ""
+    calculation_rule: str | None = None
+    related_columns: tuple[str, ...] = ()
+
+
 class SchemaCatalog(SchemaModel):
     database: str
     dialect: Dialect
     tables: tuple[Table, ...] = ()
     views: tuple[View, ...] = ()
     procedures: tuple[Procedure, ...] = ()
+    glossary: tuple[GlossaryTerm, ...] = ()
 
     @model_validator(mode="after")
     def check_table_names_unique(self) -> Self:
