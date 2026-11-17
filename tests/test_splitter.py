@@ -77,3 +77,9 @@ def test_keeps_version_comments():
 def test_unterminated_quote_or_comment_raises(sql):
     with pytest.raises(SplitError, match="unterminated"):
         split_mysql_statements(sql)
+
+
+def test_backslash_is_ordinary_when_escapes_are_off():
+    sql = "SELECT 'C:\\';SELECT 2;"
+
+    assert split_mysql_statements(sql, backslash_escapes=False) == ["SELECT 'C:\\'", "SELECT 2"]
